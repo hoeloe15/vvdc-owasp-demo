@@ -39,6 +39,48 @@ This Flask web application was intentionally designed with security vulnerabilit
 
 4. Access the application at http://127.0.0.1:5000
 
+## Deployment Options
+
+### Docker Deployment
+
+This application comes with Docker configuration files for easy deployment:
+
+1. **Development Deployment**:
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Production Deployment**:
+   ```bash
+   # Set a secure secret key
+   export SECRET_KEY="your_secure_secret_key_here"
+   
+   # Build and run the production container
+   docker-compose -f docker-compose.prod.yml up -d
+   ```
+
+3. **Deploy to Cloud Platforms**:
+   - **AWS ECS**: Push your image to ECR and deploy using ECS
+   - **Google Cloud Run**: Push your image to GCR and deploy as a Cloud Run service
+   - **Azure Container Instances**: Push your image to ACR and deploy to ACI
+   - **Digital Ocean App Platform**: Connect your repo and use the Dockerfile.prod
+
+### Vercel Deployment
+
+To deploy on Vercel:
+
+1. Install Vercel CLI:
+   ```bash
+   npm install -g vercel
+   ```
+
+2. Add a `vercel.json` file to the repository
+   
+3. Deploy using Vercel CLI:
+   ```bash
+   vercel
+   ```
+
 ## Exploitation Examples
 
 ### SQL Injection
