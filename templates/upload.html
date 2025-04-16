@@ -1,33 +1,25 @@
 {% extends 'base.html' %}
 
-{% block title %}File Upload - Vulnerable Web App{% endblock %}
+{% block title %}Share Your Crops - Farmers Unite!{% endblock %}
 
 {% block content %}
-<h1>File Upload</h1>
+<h1>Share Your Digital Harvest</h1>
 
 <form method="post" enctype="multipart/form-data">
     <div>
-        <label for="file">Select file to upload:</label>
+        <label for="file">Select a crop to share:</label>
         <input type="file" id="file" name="file" required>
     </div>
     <div>
-        <label for="path">Subdirectory (optional):</label>
-        <input type="text" id="path" name="path" placeholder="e.g., images/profile">
+        <label for="path">Where to plant it (optional):</label>
+        <input type="text" id="path" name="path" placeholder="e.g., corn/sweet">
+        <p style="font-size: 0.9em; color: #666;">Leave empty to put in the main silo.</p>
     </div>
-    <button type="submit">Upload</button>
+    <button type="submit">Harvest & Share</button>
 </form>
 
-<div style="margin-top: 20px; background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
-    <h3>Path Traversal Vulnerability</h3>
-    <p>This upload form is vulnerable to path traversal attacks because it allows specifying the directory where files
-        are saved without proper validation.</p>
-    <p>Try uploading a file with the following path to access the restricted directory:</p>
-    <ul>
-        <li><code>../restricted</code> - This can be used to upload a file to the restricted area, bypassing access
-            controls.</li>
-        <li>For a reverse shell, you could upload a PHP/Python script that executes system commands.</li>
-    </ul>
-</div>
-
-<p><a href="{{ url_for('uploads') }}">View uploaded files</a></p>
+<p style="margin-top: 20px; text-align: center;">
+    <a href="{{ url_for('uploads') }}" style="color: #4b7f52; font-weight: bold;">👉 See what other farmers have
+        shared</a>
+</p>
 {% endblock %}

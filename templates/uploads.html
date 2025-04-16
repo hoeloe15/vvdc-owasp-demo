@@ -1,21 +1,37 @@
 {% extends 'base.html' %}
 
-{% block title %}Uploaded Files - Vulnerable Web App{% endblock %}
+{% block title %}Farmer's Market - Farmers Unite!{% endblock %}
 
 {% block content %}
-<h1>Uploaded Files</h1>
+<h1>Farmer's Market - Shared Harvests</h1>
 
-{% if files %}
-<ul>
-    {% for file in files %}
-    <li>
-        <a href="{{ url_for('download_file', filename=file) }}">{{ file }}</a>
-    </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>No files have been uploaded yet.</p>
-{% endif %}
+<div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    {% if files %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+        {% for file in files %}
+        <div
+            style="background-color: rgba(75, 127, 82, 0.1); padding: 15px; border-radius: 5px; border: 1px dashed #4b7f52;">
+            <p style="margin: 0 0 10px 0; font-weight: bold;">{{ file.split('/')[-1] }}</p>
+            <a href="{{ url_for('download_file', filename=file) }}"
+                style="color: #4b7f52; text-decoration: none; display: inline-block; padding: 5px 10px; background-color: rgba(75, 127, 82, 0.2); border-radius: 3px;">
+                🌽 Harvest
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 30px 0;">
+        <img src="/static/img/confused_farmer.png" alt="Empty Field"
+            style="width: 150px; border-radius: 5px; margin-bottom: 15px;">
+        <p>The silos are empty! No crops have been shared yet.</p>
+    </div>
+    {% endif %}
+</div>
 
-<p><a href="{{ url_for('upload_file') }}">Upload a new file</a></p>
+<p style="margin-top: 20px; text-align: center;">
+    <a href="{{ url_for('upload_file') }}"
+        style="display: inline-block; padding: 10px 20px; background-color: #4b7f52; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+        Share your own digital crops
+    </a>
+</p>
 {% endblock %}

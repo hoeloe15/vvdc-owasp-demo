@@ -1,43 +1,53 @@
 {% extends 'base.html' %}
 
-{% block title %}Home - Vulnerable Web App{% endblock %}
+{% block title %}Home - Farmers Unite!{% endblock %}
 
 {% block content %}
 <div
-    style="background-color: #ffdddd; border: 2px solid #ff0000; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
-    <h2 style="color: #cc0000;">⚠️ Educational Environment Notice</h2>
-    <p>This application is deployed in a controlled environment for <strong>educational purposes only</strong>.
-        All vulnerabilities are intentional and meant to be exploited <strong>only within this application</strong>.</p>
-    <p>Any attempt to exploit these vulnerabilities against other systems or services is strictly prohibited.</p>
+    style="background-color: rgba(75, 127, 82, 0.2); border: 2px dashed #4b7f52; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+    <h2 style="color: #8b4513;">🚜 Welcome to Farmers Unite! 🌾</h2>
+    <p>A digital co-op where farmers come together to protect their digital barns and cyber fields.</p>
+    <p>Remember: <strong>This is a practice field!</strong> Feel free to try out your cyber security skills here where
+        it's safe.</p>
 </div>
 
-<h1>Welcome to the Vulnerable Web Application Demo</h1>
+<div style="display: flex; gap: 20px; margin-bottom: 30px;">
+    <div style="flex: 1;">
+        <h2>Our Digital Farm</h2>
+        <p>Howdy, partner! Welcome to Farmers Unite, where we believe even the most rural farms need protection from
+            them city-slicker hackers!</p>
+        <p>Our community helps farmers understand cyber threats in plain ol' country talk, no fancy computer jargon
+            required.</p>
+        <p><strong>Our mission:</strong> Keep your farm data as safe as cows in the barn during a thunderstorm!</p>
+    </div>
+    <div style="flex: 1;">
+        <img src="/static/img/confused_farmer.png" alt="Confused Farmer with Technology"
+            style="max-width: 100%; border-radius: 8px; border: 3px solid #8b4513;">
+    </div>
+</div>
 
-<p>This application has been intentionally designed with several security vulnerabilities for educational purposes:</p>
+<h2>What's Growing in Our Cyber Fields</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 15px;">
+    <div
+        style="flex: 1; min-width: 200px; background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3>🔒 Password Pastures</h3>
+        <p>Learn how to create strong passwords that even the wiliest coyote can't crack!</p>
+    </div>
+    <div
+        style="flex: 1; min-width: 200px; background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3>🚜 Tractor Security</h3>
+        <p>Is your smart tractor sending data to city folk? Find out how to secure your farm equipment.</p>
+    </div>
+    <div
+        style="flex: 1; min-width: 200px; background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h3>🐄 Cattle Database</h3>
+        <p>Protect your livestock records from digital rustlers!</p>
+    </div>
+</div>
 
-<ul>
-    <li><strong>SQL Injection:</strong> Try the login form with malicious SQL input</li>
-    <li><strong>Cross-Site Scripting (XSS):</strong> Post malicious JavaScript in the comments section</li>
-    <li><strong>Insecure Direct Object References (IDOR):</strong> Access user profiles by manipulating the URL</li>
-    <li><strong>Path Traversal:</strong> Upload files to unauthorized locations using the file upload feature</li>
-    <li><strong>Command Injection:</strong> Execute arbitrary system commands in the Admin Tools section</li>
-    <li><strong>Hidden Flag:</strong> Find and access the hidden flag file in the restricted directory</li>
-    <li><strong>Security Misconfiguration:</strong> The application is running in debug mode</li>
-</ul>
-
-<h2>Exploitation Scenario</h2>
-<p>This application simulates several attack vectors:</p>
-<ol>
-    <li>Use SQL injection to gain access to an account</li>
-    <li>Upload a reverse shell script through the file upload vulnerability</li>
-    <li>Use command injection to execute system commands or establish a reverse shell</li>
-    <li>Find and access the flag hidden in the restricted directory</li>
-</ol>
-
-<div style="background-color: #ffe6e6; padding: 15px; border-radius: 5px; margin-top: 20px;">
-    <h3 style="color: #cc0000;">⚠️ Warning</h3>
-    <p>This application is intentionally vulnerable and should only be used in a controlled environment for educational
-        purposes.</p>
-    <p>DO NOT deploy this application in a production environment or use it with real user data.</p>
+<div class="help-box">
+    <h3 style="color: #8b4513;">For Educational Use Only</h3>
+    <p>This website has purposeful security holes for practicing your cyber skills. Please don't try these techniques on
+        real websites!</p>
 </div>
 {% endblock %}

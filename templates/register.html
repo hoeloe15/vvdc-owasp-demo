@@ -1,37 +1,33 @@
 {% extends 'base.html' %}
 
-{% block title %}Register - Vulnerable Web App{% endblock %}
+{% block title %}Join the Co-op - Farmers Unite!{% endblock %}
 
 {% block content %}
-<h1>Register</h1>
+<div style="max-width: 500px; margin: 0 auto;">
+    <h1>Join Our Farming Community</h1>
 
-{% if error %}
-<div class="flash">{{ error }}</div>
-{% endif %}
+    {% if error %}
+    <div class="flash">{{ error }}</div>
+    {% endif %}
 
-<form method="post">
-    <div>
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-    </div>
-    <div>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-    </div>
-    <div>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-    </div>
-    <button type="submit">Register</button>
-</form>
+    <form method="post">
+        <div>
+            <label for="username">What should we call ya?</label>
+            <input type="text" id="username" name="username" placeholder="FarmerJoe" required>
+        </div>
+        <div>
+            <label for="password">Create a secret passcode:</label>
+            <input type="password" id="password" name="password" placeholder="Make it harder than 'tractor123'"
+                required>
+        </div>
+        <div>
+            <label for="email">Email for harvest notifications:</label>
+            <input type="email" id="email" name="email" placeholder="farmer@ruralroutes.com" required>
+        </div>
+        <button type="submit">Plant My Account</button>
+    </form>
 
-<div style="margin-top: 20px; background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
-    <h3>Security Issue</h3>
-    <p>This registration form has the following security issues:</p>
-    <ul>
-        <li>Passwords are stored in plaintext in the database</li>
-        <li>No validation is performed on the password strength</li>
-        <li>No CSRF protection is implemented</li>
-    </ul>
+    <p style="margin-top: 20px; text-align: center;">Already part of the co-op? <a href="{{ url_for('login') }}">Return
+            to the barnyard</a></p>
 </div>
 {% endblock %}

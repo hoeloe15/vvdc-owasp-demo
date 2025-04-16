@@ -1,27 +1,26 @@
 {% extends 'base.html' %}
 
-{% block title %}User Profile - Vulnerable Web App{% endblock %}
+{% block title %}{{ user.username }}'s Farmstead - Farmers Unite!{% endblock %}
 
 {% block content %}
-<h1>User Profile</h1>
+<h1>{{ user.username }}'s Farmstead</h1>
 
-<div>
-    <p><strong>Username:</strong> {{ user.username }}</p>
-    <p><strong>Email:</strong> {{ user.email }}</p>
-    <p><strong>User ID:</strong> {{ user.id }}</p>
-</div>
+<div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <img src="/static/img/pwnd cow.png"
+            style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #4b7f52; margin-right: 20px;">
+        <div>
+            <p><strong>Farmer Name:</strong> {{ user.username }}</p>
+            <p><strong>Farmer Email:</strong> {{ user.email }}</p>
+            <p><strong>Farm ID:</strong> {{ user.id }}</p>
+        </div>
+    </div>
 
-<div style="margin-top: 20px; background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
-    <h3>IDOR Vulnerability</h3>
-    <p>This page is vulnerable to Insecure Direct Object References (IDOR) because it doesn't verify that the current
-        user has permission to view the requested profile.</p>
-    <p>Try changing the user_id parameter in the URL to access other user profiles:</p>
+    <h3>My Cyber Farm Equipment</h3>
     <ul>
-        <li><a href="{{ url_for('profile', user_id=1) }}">User ID 1</a></li>
-        <li><a href="{{ url_for('profile', user_id=2) }}">User ID 2</a></li>
-        <li><a href="{{ url_for('profile', user_id=3) }}">User ID 3</a></li>
+        <li>Smart Tractor (Protected against unauthorized remote access)</li>
+        <li>Digital Irrigation System (Password changed from default)</li>
+        <li>Automated Feeding System (Firewall enabled)</li>
     </ul>
-    <p>A secure implementation would check if the currently logged-in user has permission to view the requested profile.
-    </p>
 </div>
 {% endblock %}

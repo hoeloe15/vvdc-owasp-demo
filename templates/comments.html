@@ -1,41 +1,33 @@
 {% extends 'base.html' %}
 
-{% block title %}Comments - Vulnerable Web App{% endblock %}
+{% block title %}Farmers' Chat - Farmers Unite!{% endblock %}
 
 {% block content %}
-<h1>Comments</h1>
+<h1>Farmers' Chat Corner</h1>
 
 <form method="post">
     <div>
-        <label for="comment">Leave a comment:</label>
-        <textarea id="comment" name="comment" rows="4" required></textarea>
+        <label for="comment">Share your farm wisdom:</label>
+        <textarea id="comment" name="comment" rows="4" placeholder="Tell us about your cyber-secure tractor..."
+            required></textarea>
     </div>
-    <button type="submit">Post Comment</button>
+    <button type="submit">Share with the Co-op</button>
 </form>
 
-<div style="margin-top: 20px; background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
-    <h3>XSS Vulnerability</h3>
-    <p>This comment section is vulnerable to Cross-Site Scripting (XSS) attacks because user input is rendered directly
-        without sanitization.</p>
-    <p>Try posting a comment with JavaScript code, such as:</p>
-    <ul>
-        <li><code>&lt;script&gt;alert('XSS');&lt;/script&gt;</code></li>
-        <li><code>&lt;img src="x" onerror="alert('XSS')"&gt;</code></li>
-        <li><code>&lt;a href="javascript:alert('XSS')"&gt;Click me&lt;/a&gt;</code></li>
-    </ul>
-</div>
-
-<h2>Recent Comments</h2>
+<h2>Field Reports</h2>
 
 {% if comments %}
 {% for comment in comments %}
 <div class="comment">
-    <strong>{{ comment.username or 'Anonymous' }}:</strong>
+    <div style="display: flex; align-items: center; margin-bottom: 5px;">
+        <img src="/static/img/pwnd cow.png" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 10px;">
+        <strong>{{ comment.username or 'Mystery Farmer' }}:</strong>
+    </div>
     <!-- VULNERABILITY: Raw HTML is rendered without escaping, allowing XSS -->
     {{ comment.content | safe }}
 </div>
 {% endfor %}
 {% else %}
-<p>No comments yet. Be the first to comment!</p>
+<p>The fields are quiet. Be the first to share some farm wisdom!</p>
 {% endif %}
 {% endblock %}

@@ -4,39 +4,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Vulnerable Web App{% endblock %}</title>
+    <title>{% block title %}Farmers Unite!{% endblock %}</title>
     <style>
+        :root {
+            --farm-green: #4b7f52;
+            --wheat-color: #f5deb3;
+            --soil-brown: #8b4513;
+            --sky-blue: #87ceeb;
+            --hay-yellow: #e6c546;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: 'Comic Sans MS', 'Helvetica', sans-serif;
+            max-width: 950px;
             margin: 0 auto;
             padding: 20px;
             line-height: 1.6;
+            background-color: var(--wheat-color);
+            color: #333;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        header img {
+            max-height: 80px;
+            margin-right: 15px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--farm-green);
         }
 
         nav {
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: var(--farm-green);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         nav a {
             margin-right: 15px;
             text-decoration: none;
-            color: #007bff;
+            color: var(--wheat-color);
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--hay-yellow);
         }
 
         .flash {
             padding: 10px;
             margin: 10px 0;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
+            background-color: var(--hay-yellow);
+            border: 1px solid var(--soil-brown);
             border-radius: 4px;
-            color: #721c24;
+            color: var(--soil-brown);
         }
 
         form {
             margin: 20px 0;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         input,
@@ -45,42 +84,76 @@
             padding: 8px;
             margin: 8px 0;
             box-sizing: border-box;
+            border: 1px solid var(--farm-green);
+            border-radius: 4px;
         }
 
         button {
-            background-color: #007bff;
+            background-color: var(--farm-green);
             color: white;
             padding: 10px 15px;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--soil-brown);
         }
 
         .comment {
-            margin: 10px 0;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-left: 3px solid #007bff;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: white;
+            border-left: 3px solid var(--farm-green);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         pre {
             white-space: pre-wrap;
             word-wrap: break-word;
+            background-color: white;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .help-box {
+            margin-top: 20px;
+            background-color: rgba(135, 206, 235, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px dashed var(--farm-green);
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: var(--soil-brown);
+            font-size: 0.9em;
         }
     </style>
 </head>
 
 <body>
+    <header>
+        <img src="/static/img/pwnd cow.png" alt="Farmers Unite Logo" style="max-width: 80px;">
+        <h1 style="margin: 0;">Farmers Unite! - CyberBarn Security</h1>
+    </header>
+
     <nav>
-        <a href="{{ url_for('index') }}">Home</a>
-        <a href="{{ url_for('comments') }}">Comments</a>
-        <a href="{{ url_for('upload_file') }}">Upload</a>
+        <a href="{{ url_for('index') }}">Home Pasture</a>
+        <a href="{{ url_for('comments') }}">Farmers' Chat</a>
+        <a href="{{ url_for('upload_file') }}">Share Your Crops</a>
         {% if session.logged_in %}
-        <a href="{{ url_for('profile', user_id=session.user_id) }}">My Profile</a>
-        <a href="{{ url_for('admin_tools') }}">Admin Tools</a>
+        <a href="{{ url_for('profile', user_id=session.user_id) }}">My Farmstead</a>
+        <a href="{{ url_for('admin_tools') }}">Barn Tools</a>
         <a href="{{ url_for('logout') }}">Logout ({{ session.username }})</a>
         {% else %}
         <a href="{{ url_for('login') }}">Login</a>
-        <a href="{{ url_for('register') }}">Register</a>
+        <a href="{{ url_for('register') }}">Join the Co-op</a>
         {% endif %}
     </nav>
 
@@ -93,6 +166,10 @@
     {% endwith %}
 
     {% block content %}{% endblock %}
+
+    <footer>
+        &copy; 2023 Farmers Unite! - Where Digital Farming Meets Cyber Security
+    </footer>
 </body>
 
 </html>
