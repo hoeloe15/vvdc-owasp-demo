@@ -14,13 +14,20 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Create a non-root user to run the app
-RUN adduser --disabled-password --gecos "" appuser
-
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends curl \
+# Install runtime dependencies including sudo for privesc demo
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    sudo \
+    net-tools \
+    netcat-traditional \
+    procps \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user to run the app
+RUN adduser --disabled-password --gecos "" appuser
+# Allow this user to use sudo for the privesc demo
+RUN echo "appuser ALL=(ALL) NOPASSWD: /tmp/backup_app.sh" >> /etc/sudoers.d/appuser
 
 # Copy wheels from builder stage
 COPY --from=builder /app/wheels /wheels
@@ -29,15 +36,45 @@ COPY --from=builder /app/requirements.txt .
 # Install dependencies
 RUN pip install --no-cache /wheels/*
 
-# Copy application code
+# Copy application code including examples directory
 COPY . .
 
 # Create necessary directories
 RUN mkdir -p uploads restricted
 
-# Set proper permissions
+# Create flag file in a restricted area for CTF challenge
+RUN mkdir -p /root
+RUN echo "FLAG{c0ngr4tul4t10ns_y0u_h4v3_r00t_4cc3ss}" > /root/root_flag.txt
+
+# Create the vulnerable backup script for privilege escalation
+RUN echo '#!/bin/bash\n\
+    # This script backs up the web application\n\
+    # VULNERABILITY: This script is allowed to run as root via sudo without password\n\
+    # and contains command injection in the filename parameter\n\
+    \n\
+    APP_DIR="."\n\
+    BACKUP_DIR="/tmp"\n\
+    \n\
+    # Get backup name from parameter or use default\n\
+    BACKUP_NAME="${1:-backup_$(date +%s)}"\n\
+    \n\
+    echo "[+] Backing up application..."\n\
+    tar czf "$BACKUP_DIR/$BACKUP_NAME.tar.gz" "$APP_DIR" 2>/dev/null\n\
+    \n\
+    # Clean up old backups - VULNERABLE to command injection!\n\
+    echo "[+] Cleaning up old backups matching pattern: $BACKUP_NAME"\n\
+    find "$BACKUP_DIR" -name "*$BACKUP_NAME*" -type f -mtime +7 -delete 2>/dev/null\n\
+    \n\
+    echo "[+] Backup process completed"\n\
+    ' > /tmp/backup_app.sh
+
+# Make the backup script executable
+RUN chmod +x /tmp/backup_app.sh
+
+# Set proper permissions for directories
 RUN chown -R appuser:appuser /app
 RUN chmod 750 uploads restricted
+RUN chmod -R 755 /tmp/backup_app.sh
 
 # Set the user to run the application
 USER appuser
