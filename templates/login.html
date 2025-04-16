@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Vulnerable Web App{% endblock %}
+
+{% block content %}
+<h1>Login</h1>
+
+{% if error %}
+<div class="flash">{{ error }}</div>
+{% endif %}
+
+<form method="post">
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+    </div>
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit">Login</button>
+</form>
+
+<div style="margin-top: 20px; background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
+    <h3>SQL Injection Vulnerability</h3>
+    <p>This login form is vulnerable to SQL injection. Try these examples:</p>
+    <ul>
+        <li><code>' OR '1'='1</code> in the username field with any password to bypass authentication</li>
+        <li><code>admin' --</code> in the username field to login as admin without knowing the password</li>
+    </ul>
+    <p>The vulnerability exists because user input is directly concatenated into the SQL query without proper
+        sanitization.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Vulnerable Web App{% endblock %}
+
+{% block content %}
+<h1>Welcome to the Vulnerable Web Application Demo</h1>
+
+<p>This application has been intentionally designed with several security vulnerabilities for educational purposes:</p>
+
+<ul>
+    <li><strong>SQL Injection:</strong> Try the login form with malicious SQL input</li>
+    <li><strong>Cross-Site Scripting (XSS):</strong> Post malicious JavaScript in the comments section</li>
+    <li><strong>Insecure Direct Object References (IDOR):</strong> Access user profiles by manipulating the URL</li>
+    <li><strong>Path Traversal:</strong> Upload files to unauthorized locations using the file upload feature</li>
+    <li><strong>Command Injection:</strong> Execute arbitrary system commands in the Admin Tools section</li>
+    <li><strong>Hidden Flag:</strong> Find and access the hidden flag file in the restricted directory</li>
+    <li><strong>Security Misconfiguration:</strong> The application is running in debug mode</li>
+</ul>
+
+<h2>Exploitation Scenario</h2>
+<p>This application simulates several attack vectors:</p>
+<ol>
+    <li>Use SQL injection to gain access to an account</li>
+    <li>Upload a reverse shell script through the file upload vulnerability</li>
+    <li>Use command injection to execute system commands or establish a reverse shell</li>
+    <li>Find and access the flag hidden in the restricted directory</li>
+</ol>
+
+<div style="background-color: #ffe6e6; padding: 15px; border-radius: 5px; margin-top: 20px;">
+    <h3 style="color: #cc0000;">⚠️ Warning</h3>
+    <p>This application is intentionally vulnerable and should only be used in a controlled environment for educational
+        purposes.</p>
+    <p>DO NOT deploy this application in a production environment or use it with real user data.</p>
+</div>
+{% endblock %}

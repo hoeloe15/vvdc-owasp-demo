@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile - Vulnerable Web App{% endblock %}
+
+{% block content %}
+<h1>User Profile</h1>
+
+<div>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>User ID:</strong> {{ user.id }}</p>
+</div>
+
+<div style="margin-top: 20px; background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
+    <h3>IDOR Vulnerability</h3>
+    <p>This page is vulnerable to Insecure Direct Object References (IDOR) because it doesn't verify that the current
+        user has permission to view the requested profile.</p>
+    <p>Try changing the user_id parameter in the URL to access other user profiles:</p>
+    <ul>
+        <li><a href="{{ url_for('profile', user_id=1) }}">User ID 1</a></li>
+        <li><a href="{{ url_for('profile', user_id=2) }}">User ID 2</a></li>
+        <li><a href="{{ url_for('profile', user_id=3) }}">User ID 3</a></li>
+    </ul>
+    <p>A secure implementation would check if the currently logged-in user has permission to view the requested profile.
+    </p>
+</div>
+{% endblock %}

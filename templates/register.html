@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Vulnerable Web App{% endblock %}
+
+{% block content %}
+<h1>Register</h1>
+
+{% if error %}
+<div class="flash">{{ error }}</div>
+{% endif %}
+
+<form method="post">
+    <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+    </div>
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <button type="submit">Register</button>
+</form>
+
+<div style="margin-top: 20px; background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
+    <h3>Security Issue</h3>
+    <p>This registration form has the following security issues:</p>
+    <ul>
+        <li>Passwords are stored in plaintext in the database</li>
+        <li>No validation is performed on the password strength</li>
+        <li>No CSRF protection is implemented</li>
+    </ul>
+</div>
+{% endblock %}

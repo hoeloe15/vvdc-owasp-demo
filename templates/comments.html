@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Comments - Vulnerable Web App{% endblock %}
+
+{% block content %}
+<h1>Comments</h1>
+
+<form method="post">
+    <div>
+        <label for="comment">Leave a comment:</label>
+        <textarea id="comment" name="comment" rows="4" required></textarea>
+    </div>
+    <button type="submit">Post Comment</button>
+</form>
+
+<div style="margin-top: 20px; background-color: #e6f7ff; padding: 10px; border-radius: 5px;">
+    <h3>XSS Vulnerability</h3>
+    <p>This comment section is vulnerable to Cross-Site Scripting (XSS) attacks because user input is rendered directly
+        without sanitization.</p>
+    <p>Try posting a comment with JavaScript code, such as:</p>
+    <ul>
+        <li><code>&lt;script&gt;alert('XSS');&lt;/script&gt;</code></li>
+        <li><code>&lt;img src="x" onerror="alert('XSS')"&gt;</code></li>
+        <li><code>&lt;a href="javascript:alert('XSS')"&gt;Click me&lt;/a&gt;</code></li>
+    </ul>
+</div>
+
+<h2>Recent Comments</h2>
+
+{% if comments %}
+{% for comment in comments %}
+<div class="comment">
+    <strong>{{ comment.username or 'Anonymous' }}:</strong>
+    <!-- VULNERABILITY: Raw HTML is rendered without escaping, allowing XSS -->
+    {{ comment.content | safe }}
+</div>
+{% endfor %}
+{% else %}
+<p>No comments yet. Be the first to comment!</p>
+{% endif %}
+{% endblock %}
