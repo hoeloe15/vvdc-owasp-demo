@@ -21,6 +21,7 @@ CREATE TABLE comments (
 INSERT INTO users (username, password, email, is_admin) VALUES ('admin', 'admin123', 'admin@example.com', 1);
 INSERT INTO users (username, password, email, is_admin) VALUES ('john', 'password123', 'john@example.com', 0);
 INSERT INTO users (username, password, email, is_admin) VALUES ('user', 'welcome123', 'sarah@example.com', 0);
+INSERT INTO users (username, password, email, is_admin) VALUES ('boer', 'vivat', 'boer@example.com', 0);
 
 -- Insert some sample comments
 INSERT INTO comments (user_id, content) VALUES (1, 'Welcome to our vulnerable demo application!');

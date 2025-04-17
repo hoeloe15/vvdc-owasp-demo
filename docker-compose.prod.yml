@@ -10,14 +10,26 @@ services:
     volumes:
       - ./uploads:/app/uploads
       - ./restricted:/app/restricted
+      # Note: intentionally not mounting the database file so it stays fresh in the container
     restart: always
+    # Privileged mode to allow for privilege escalation demonstrations
+    privileged: true
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
     environment:
       - FLASK_APP=app.py
-      - FLASK_DEBUG=0 # Turn off debug mode in production
-      - SECRET_KEY=${SECRET_KEY:-default_secret_key} # Use env variable or default
+      - FLASK_DEBUG=1 # Keep debug mode enabled for the demo
+      - SECRET_KEY=${SECRET_KEY:-super_insecure_secret_key} # Insecure by design
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:5000/" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 5s
+    container_name: vvdc-owasp-demo
+    # The demo will display a hostname
+    hostname: vvdc-demo-system

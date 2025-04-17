@@ -14,20 +14,31 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install runtime dependencies including sudo for privesc demo
+# Install runtime dependencies including tools for the privilege escalation demo
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     sudo \
     net-tools \
     netcat-traditional \
     procps \
+    findutils \
+    vim \
+    python3 \
+    perl \
+    tar \
+    sqlite3 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user to run the app
-RUN adduser --disabled-password --gecos "" appuser
-# Allow this user to use sudo for the privesc demo
-RUN echo "appuser ALL=(ALL) NOPASSWD: /tmp/backup_app.sh" >> /etc/sudoers.d/appuser
+# Configure www-data user for the vulnerable application
+# Typically the web server's user in a production environment
+RUN if ! getent passwd www-data > /dev/null; then \
+    adduser --system --disabled-password --gecos "" www-data; \
+    fi
+
+# Allow www-data to use sudo for privilege escalation demo
+RUN echo "www-data ALL=(ALL) NOPASSWD: /tmp/backup_app.sh, /usr/bin/find, /usr/bin/python3, /usr/bin/perl, /usr/bin/vim" >> /etc/sudoers.d/www-data \
+    && chmod 0440 /etc/sudoers.d/www-data
 
 # Copy wheels from builder stage
 COPY --from=builder /app/wheels /wheels
@@ -36,15 +47,20 @@ COPY --from=builder /app/requirements.txt .
 # Install dependencies
 RUN pip install --no-cache /wheels/*
 
-# Copy application code including examples directory
+# Copy application code
 COPY . .
 
-# Create necessary directories
-RUN mkdir -p uploads restricted
+# Remove any existing database file to ensure we start fresh
+RUN rm -f vulnerable_app.db
 
-# Create flag file in a restricted area for CTF challenge
+# Create necessary directories
+RUN mkdir -p uploads restricted /tmp
+
+# Create flag files for the CTF challenge
 RUN mkdir -p /root
 RUN echo "FLAG{c0ngr4tul4t10ns_y0u_h4v3_r00t_4cc3ss}" > /root/root_flag.txt
+RUN mkdir -p restricted
+RUN echo "FLAG{y0u_f0und_th3_us3r_fl4g_n0w_try_f0r_r00t}" > restricted/flag.txt
 
 # Create the vulnerable backup script for privilege escalation
 RUN echo '#!/bin/bash\n\
@@ -71,16 +87,38 @@ RUN echo '#!/bin/bash\n\
 # Make the backup script executable
 RUN chmod +x /tmp/backup_app.sh
 
-# Set proper permissions for directories
-RUN chown -R appuser:appuser /app
-RUN chmod 750 uploads restricted
-RUN chmod -R 755 /tmp/backup_app.sh
+# Create fake credentials file
+RUN echo '# Old database credentials - DO NOT USE IN PRODUCTION!\n\
+    DB_USER=dbadmin\n\
+    DB_PASS=Password123!\n\
+    DB_HOST=localhost\n\
+    DB_NAME=webapp_db\n\
+    \n\
+    # API Keys\n\
+    API_KEY_PROD=sk_live_51Ks93jDKs39sKDKs99KdkS93\n\
+    API_KEY_DEV=sk_test_51Ks93jDKs39sKDKs99KdkS93\n\
+    \n\
+    # Admin credentials (old)\n\
+    ADMIN_USER=admin\n\
+    ADMIN_PASS=admin123\n\
+    ' > /tmp/old_credentials.txt
 
-# Set the user to run the application
-USER appuser
+# Set SUID bit on binaries (optional, uncomment if you want SUID binaries)
+# RUN chmod u+s /usr/bin/find /usr/bin/vim /usr/bin/python3
+
+# Set proper permissions for web application files
+RUN chown -R www-data:www-data /app /tmp/backup_app.sh /tmp/old_credentials.txt
+RUN chmod 750 uploads restricted
+RUN chmod 755 /tmp/backup_app.sh
+RUN chmod 644 /tmp/old_credentials.txt
 
 # Expose the port
 EXPOSE 5000
 
-# Run the application
-CMD ["python", "app.py"] 
+# Set the container to run as root initially so it can create and configure files
+# The app will drop privileges when appropriate
+# This allows the privilege escalation demo to work properly
+USER root
+
+# Initialize the database and start the application
+CMD ["sh", "-c", "python -c 'from app import init_db; init_db()' && python app.py"] 

