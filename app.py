@@ -5,6 +5,7 @@ import stat
 import sys
 from flask import Flask, request, render_template, redirect, url_for, session, g, flash, send_from_directory
 from werkzeug.utils import secure_filename
+import platform # Needed to get current user
 
 # Configuration constants for privilege escalation demo
 ROOT_FLAG_CONTENT = "FLAG{c0ngr4tul4t10ns_y0u_h4v3_r00t_4cc3ss}"
@@ -434,6 +435,46 @@ def restricted_file(filename):
     
     # Even with the check, a user could access this through the upload vulnerability
     return send_from_directory(FLAG_DIR, filename)
+
+# --- NEW WEB TERMINAL ROUTE --- 
+@app.route('/webterminal', methods=['GET', 'POST'])
+def web_terminal():
+    output = None
+    current_user = None
+    try:
+        # Try to get the current user for display
+        if platform.system() == "Windows":
+            current_user = os.getenv('USERNAME')
+        else:
+            # On Linux/macOS, use whoami command
+            current_user = subprocess.check_output('whoami', text=True).strip()
+    except Exception:
+        current_user = 'unknown' # Fallback
+
+    if request.method == 'POST':
+        command = request.form.get('cmd', '')
+        if command:
+            try:
+                # Execute the command using subprocess
+                # shell=True is needed for many shell commands but is risky
+                # This is intentionally vulnerable for the demo
+                output = subprocess.check_output(
+                    command,
+                    shell=True,
+                    stderr=subprocess.STDOUT, # Combine stdout and stderr
+                    text=True
+                )
+            except subprocess.CalledProcessError as e:
+                # If the command returns non-zero exit code
+                output = e.output
+            except Exception as e:
+                # Other errors (e.g., command not found on Windows if shell=False)
+                output = f"Error executing command: {str(e)}"
+        else:
+            output = "No command entered."
+            
+    return render_template('web_terminal.html', output=output, current_user=current_user)
+# --- END WEB TERMINAL ROUTE ---
 
 @app.route('/demo-info')
 def demo_info():

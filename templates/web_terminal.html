@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Web Terminal{% endblock %}
+
+{% block content %}
+<h1>Web Terminal</h1>
+<p>Execute commands as the web server user ({{ current_user or 'www-data' }}).</p>
+
+<form method="post">
+    <label for="cmd">Command:</label>
+    <input type="text" id="cmd" name="cmd" size="80" required autofocus>
+    <button type="submit">Execute</button>
+</form>
+
+{% if output is defined %}
+<h2>Output:</h2>
+<pre
+    style="background-color: #f5f5f5; border: 1px solid #ccc; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word;">
+{{ output }}
+</pre>
+{% endif %}
+
+{% endblock %}
