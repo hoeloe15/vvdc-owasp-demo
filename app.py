@@ -353,7 +353,6 @@ def uploads():
 @app.route('/uploads/<path:filename>')
 def download_file(filename):
     # Construct the full path safely within the UPLOAD_FOLDER
-    # Normalize path to prevent escaping UPLOAD_FOLDER with ../
     base_dir = os.path.abspath(UPLOAD_FOLDER)
     requested_path = os.path.abspath(os.path.join(base_dir, filename))
 
@@ -367,31 +366,30 @@ def download_file(filename):
         flash('File not found.')
         return redirect(url_for('uploads'))
 
-    # --- NEW LOGIC for executing exec.py ---
-    if os.path.basename(requested_path) == 'exec.py':
+    # --- REVERT TO PHP EXECUTION LOGIC ---
+    # Check if the file is a PHP file
+    if filename.lower().endswith('.php'):
         try:
-            with open(requested_path, 'r') as f:
-                python_code = f.read()
-
-            if python_code:
-                # Execute the Python code read from the file
-                # WARNING: exec() is extremely dangerous with untrusted input!
-                # This is intentionally vulnerable for the demo.
-                exec(python_code)
-                # If exec() runs successfully (e.g., starts a reverse shell),
-                # we might not reach this return statement.
-                # If it completes without error/blocking, return a success message.
-                return "Python code executed successfully (check listener).", 200
-            else:
-                return "The file 'exec.py' is empty.", 400
-
+            # Execute the PHP file using the installed PHP interpreter
+            # Return its output (which might be nothing if it's just a reverse shell)
+            # Note: We don't capture stderr here by default, but could add stderr=subprocess.STDOUT
+            output = subprocess.check_output(['php', requested_path], text=True, timeout=15) # Added timeout
+            # If the PHP script produces output (e.g., not just a shell), display it
+            return f"<pre>PHP Script Output:\n{output}</pre>"
+        except subprocess.TimeoutExpired:
+             return "PHP script execution timed out (maybe a shell connected?). Check listener.", 200
+        except subprocess.CalledProcessError as e:
+            # If PHP execution fails (e.g., syntax error in the script)
+            return f"<pre>PHP Error:\n{e.output or str(e)}</pre>", 500
+        except FileNotFoundError:
+            # If PHP is somehow still not found in PATH within WSL
+            return "PHP interpreter ('php') not found in WSL environment PATH.", 500
         except Exception as e:
-            # If execution fails, return the error
-            return f"<pre>Error executing Python code: {str(e)}</pre>", 500
-    # --- END NEW LOGIC ---
+            # Catch other potential errors
+            return f"<pre>Error executing PHP: {str(e)}</pre>", 500
+    # --- END PHP EXECUTION LOGIC ---
 
-    # For any other file, serve it for download as before
-    # Use send_from_directory for safer file serving
+    # For non-PHP files, serve it for download as before
     return send_from_directory(os.path.dirname(requested_path), os.path.basename(requested_path))
 
 # VULNERABILITY: Command Injection
