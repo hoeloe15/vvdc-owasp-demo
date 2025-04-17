@@ -4,6 +4,7 @@ import subprocess
 import stat
 import sys
 from flask import Flask, request, render_template, redirect, url_for, session, g, flash, send_from_directory
+from werkzeug.utils import secure_filename
 
 # Configuration constants for privilege escalation demo
 ROOT_FLAG_CONTENT = "FLAG{c0ngr4tul4t10ns_y0u_h4v3_r00t_4cc3ss}"
@@ -318,19 +319,21 @@ def upload_file():
             return redirect(request.url)
         
         if uploaded_file:
-            # VULNERABILITY: Path Traversal - using user input for file path
-            # A malicious user can use "../" to navigate to other directories
-            # For example: "../restricted/malicious.php" could overwrite sensitive files
-            file_path = request.form.get('path', '')
-            save_path = os.path.join(UPLOAD_FOLDER, file_path, uploaded_file.filename)
+            # Use secure_filename to prevent directory traversal in the filename itself
+            # and sanitize the filename
+            filename = secure_filename(uploaded_file.filename)
             
-            # Create directory if it doesn't exist
-            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            # Always save directly in the UPLOAD_FOLDER
+            save_path = os.path.join(UPLOAD_FOLDER, filename)
+            
+            # Create UPLOAD_FOLDER if it doesn't exist (should exist, but safe check)
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
             
             # Save the file
             uploaded_file.save(save_path)
             
-            flash(f'File uploaded successfully to {save_path}')
+            # Updated flash message
+            flash(f'File uploaded successfully as {filename} to the uploads folder')
             return redirect(url_for('uploads'))
     
     return render_template('upload.html')
@@ -348,23 +351,47 @@ def uploads():
 
 @app.route('/uploads/<path:filename>')
 def download_file(filename):
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
-    
-    # Check if the file is a PHP file
-    if filename.endswith('.php'):
+    # Construct the full path safely within the UPLOAD_FOLDER
+    # Normalize path to prevent escaping UPLOAD_FOLDER with ../
+    base_dir = os.path.abspath(UPLOAD_FOLDER)
+    requested_path = os.path.abspath(os.path.join(base_dir, filename))
+
+    # Security check: Ensure the requested path is still within the UPLOAD_FOLDER
+    if not requested_path.startswith(base_dir):
+        flash('Access denied: Invalid path.')
+        return redirect(url_for('uploads'))
+
+    # Check if the requested file exists
+    if not os.path.isfile(requested_path):
+        flash('File not found.')
+        return redirect(url_for('uploads'))
+
+    # --- NEW LOGIC for executing exec.py ---
+    if os.path.basename(requested_path) == 'exec.py':
         try:
-            # Execute the PHP file and return its output
-            output = subprocess.check_output(['php', file_path], stderr=subprocess.STDOUT, text=True)
-            return output
-        except subprocess.CalledProcessError as e:
-            # If PHP execution fails, return the error
-            return f"PHP Error: {e.output}", 500
-        except FileNotFoundError:
-            # If PHP is not installed
-            return "PHP interpreter not found. Please install PHP to execute PHP files.", 500
-    
-    # For non-PHP files, serve as usual
-    return send_from_directory(UPLOAD_FOLDER, filename)
+            with open(requested_path, 'r') as f:
+                python_code = f.read()
+
+            if python_code:
+                # Execute the Python code read from the file
+                # WARNING: exec() is extremely dangerous with untrusted input!
+                # This is intentionally vulnerable for the demo.
+                exec(python_code)
+                # If exec() runs successfully (e.g., starts a reverse shell),
+                # we might not reach this return statement.
+                # If it completes without error/blocking, return a success message.
+                return "Python code executed successfully (check listener).", 200
+            else:
+                return "The file 'exec.py' is empty.", 400
+
+        except Exception as e:
+            # If execution fails, return the error
+            return f"<pre>Error executing Python code: {str(e)}</pre>", 500
+    # --- END NEW LOGIC ---
+
+    # For any other file, serve it for download as before
+    # Use send_from_directory for safer file serving
+    return send_from_directory(os.path.dirname(requested_path), os.path.basename(requested_path))
 
 # VULNERABILITY: Command Injection
 @app.route('/admin/tools', methods=['GET', 'POST'])
